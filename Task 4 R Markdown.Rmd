@@ -1,0 +1,46 @@
+---
+title: "Task 4 Markdown"
+output: html_document
+---
+#Load packages and import data set
+```{r}
+library(arules)
+library(arulesViz)
+
+setwd("~/Ubiqum/Project 2/Task 4 - Market Basket Analysis/Original Data Sets")
+trans <- read.transactions("ElectronidexTransactions2017.csv", 
+                           format = "basket", sep=",", rm.duplicates=TRUE)
+```
+
+#Plot of the most frequently purchased items
+```{r}
+mostFreq <- itemFrequencyPlot(trans, topN=10)
+```
+
+#List of the least frequently purchased items
+```{r}
+frequencies <- itemFrequency(trans)
+sorted <- sort(frequencies, decreasing = FALSE)
+sorted[1:10] #10 least frequent products
+allunder005 <- sorted[sorted<.005]
+allunder005
+```
+#Apply apriori algorithm to transaction data setting support and confidence low to produce a large amount of rules. Use summary to find the min, max, mean, & median of confidence, support, and lift for the rules. With these parameters, 41,602 rules are produced.
+```{r}
+rules1 <- apriori (trans, parameter = list(supp = 0.001, conf = 0.1, minlen = 2))
+rules1
+summary(rules1)
+```
+#Reset apriori parameters based on the means of support and confidence to reduce number of rules being produced. This time, 3,719 rules are produced.
+```{r}
+rules2 <- apriori (trans, parameter = list(supp = 0.002017, conf = 0.3204, minlen = 2))
+rules2
+```
+#Filter rules for only Apple Earbuds (one of 10 most frequently purchased items). Result is 278 rules. Sort the rules by lift to see which are most important.
+```{r}
+EarpodRules <- subset(rules2, items %in% "Apple Earpods")
+EarpodRules
+summary(EarpodRules)
+inspect(sort(EarpodRules, by = "lift"))
+```
+
